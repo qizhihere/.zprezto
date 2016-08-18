@@ -50,7 +50,7 @@ elif has vim; then
 fi
 
 # java environment
-export JAVA_HOME=$(ls -dr1 /usr/lib/jvm/java-*-openjdk 2>/dev/null | head -1)
+export JAVA_HOME=$(eval "ls -dr1 /usr/lib/jvm/java-*-openjdk" 2>/dev/null | head -1)
 
 # PATH
 add_paths $HOME/.rbenv/bin \
@@ -68,7 +68,7 @@ if has rbenv; then
     add_paths ~/.rbenv/shims
     eval "$(rbenv init - | sed '/export PATH=".\+rbenv\/shims/d')"
 else
-    export BUNDLE_PATH=$(ls -dr1 ~/.gem/ruby/* 2>/dev/null)
+    export BUNDLE_PATH=$(eval "ls -dr1 ~/.gem/ruby/*" 2>/dev/null)
     add_paths "$BUNDLE_PATH/bin"
 fi
 #---------------------------------------------------------------------

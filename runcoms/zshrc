@@ -68,7 +68,7 @@ if has rbenv; then
     add_paths ~/.rbenv/shims
     eval "$(rbenv init - | sed '/export PATH=".\+rbenv\/shims/d')"
 else
-    export BUNDLE_PATH=$(ls -dr1 ~/.gem/ruby/*)
+    export BUNDLE_PATH=$(ls -dr1 ~/.gem/ruby/* 2>/dev/null)
     add_paths "$BUNDLE_PATH/bin"
 fi
 #---------------------------------------------------------------------
@@ -88,9 +88,10 @@ install_fasd() {
 }
 ! has fasd && {
     echo "Installing fasd..."
-    $(install_fasd) && eval "$(fasd --init auto)"
+    $(install_fasd)
     exec zsh
 }
+eval "$(fasd --init auto)"
 #---------------------------------------------------------------------
 
 

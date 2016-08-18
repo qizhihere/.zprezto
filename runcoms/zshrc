@@ -1,13 +1,356 @@
-#
-# Executes commands at the start of an interactive session.
-#
-# Authors:
-#   Sorin Ionescu <sorin.ionescu@gmail.com>
-#
-
 # Source Prezto.
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
-  source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
+    source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
 fi
 
-# Customize to your needs...
+# base functions #####################################################
+ialias() {
+    alias $1=$2
+}
+
+has() {
+    for i in "$@"; do
+        type -a "$i" >/dev/null 2>&1 || return 1
+    done
+}
+
+has_proc() {
+    [ "$(pgrep -f "^$*")" ] || return 1
+}
+
+add_paths() {
+    for x in "$@"; do
+        if ! echo "$PATH" | grep -q "\(^\|:\)$x\(:\|$\)" 2>/dev/null &&
+           [ -d "$x" ]; then
+            export PATH="$x:$PATH"
+        fi
+    done
+}
+
+del_paths() {
+    for x in "$@"; do
+        export PATH=$(echo "$PATH" | sed "s#\(^\|:\)$x##g;s#^:##")
+    done
+}
+
+! has "realpath" && ialias realpath "readlink -f"
+#---------------------------------------------------------------------
+
+
+# environments #######################################################
+# term 256 color support
+export INIT_TERM="$TERM"
+export TERM="screen-256color"
+
+# default editor
+if has emacsclient && has_proc "^emacs +.*--daemon=cli"; then
+    export EDITOR="emacsclient -s cli -nw -c"
+elif has vim; then
+    export EDITOR="vim"
+fi
+
+# java environment
+export JAVA_HOME=$(ls -dr1 /usr/lib/jvm/java-*-openjdk 2>/dev/null | head -1)
+
+# PATH
+add_paths $HOME/.rbenv/bin \
+          $HOME/scripts/bin $HOME/.composer/vendor/bin \
+          $HOME/.emacs.d/bin /usr/bin/core_perl \
+          $HOME/.local/bin /usr/local/bin \
+          /usr/sbin /sbin /usr/local/sbin \
+          $JAVA_HOME/bin
+
+# docker daemon
+export DOCKER_HOST="unix:///var/run/docker.sock"
+
+# maybe use rbenv
+if has rbenv; then
+    add_paths ~/.rbenv/shims
+    eval "$(rbenv init - | sed '/export PATH=".\+rbenv\/shims/d')"
+else
+    export BUNDLE_PATH=$(ls -dr1 ~/.gem/ruby/*)
+    add_paths "$BUNDLE_PATH/bin"
+fi
+#---------------------------------------------------------------------
+
+
+# third-party programs ###############################################
+# ls colors
+[ -f ~/.dircolors ] && eval "$(dircolors -b ~/.dircolors)"
+
+# fasd
+install_fasd() {
+    local install_dir=/tmp/install_fasd
+    mkdir -p "$install_dir" && cd "$install_dir" &&
+    wget https://github.com/clvv/fasd/tarball/1.0.1 -qO - | tar -xpzf - &&
+    mkdir -p ~/.local/bin && cp clvv-fasd*/fasd ~/.local/bin/ &&
+    cd / && rm -rf "$install_dir"
+}
+! has fasd && {
+    echo "Installing fasd..."
+    $(install_fasd) && eval "$(fasd --init auto)"
+    exec zsh
+}
+#---------------------------------------------------------------------
+
+
+# aliases ############################################################
+# basic commands
+-(){cd -}
+ialias ... "cd ../../"
+ialias .... "cd ../../../"
+ialias ..... "cd ../../../../"
+ialias ...... "cd ../../../../../"
+
+ialias CP "rsync -aP"
+
+ialias l 'ls -lah'
+ialias la 'ls -lAh'
+ialias ll 'ls -lh'
+ialias ls 'command ls --color=tty'
+
+# process
+ialias psp "ps -A -o user,comm | sort -k2 | uniq -c | sort -k1 -n"
+ialias psm "ps -eo rss,pmem,pcpu,vsize,comm | sort -k 1 -n"
+ialias psc "ps -eo rss,pmem,pcpu,vsize,comm | sort -k 2 -n"
+
+# device
+ialias lsdev "lsblk -o NAME,LABEL,FSTYPE,RM,SIZE,MOUNTPOINT,UUID"
+
+# system managment
+ialias sudo "command sudo -E"
+ialias timesync "sudo ntpdate -u cn.pool.ntp.org; sudo hwclock -w"
+
+ialias ppi "sudo pacman -S"
+ialias ppr "sudo pacman -Rsc"
+ialias pps "sudo pacman -Ss"
+ialias pai "pacaur -S --noedit --noconfirm"
+ialias par "pacaur -Rsc"
+ialias pas "pacaur -Ss"
+ialias pau "pacaur -Syu"
+ialias pay "pacaur -Syy"
+ialias pls 'expac -H M -s "%-3! %-25n  -> %-10v %-10m %l <%+5r>  ::%d"'
+
+# network
+ialias xyw "sudo ~/Softs/rj/rjsupplicant.sh"
+ialias px "proxychains4"
+ialias spx "sudo proxychains4"
+ialias dstat "command dstat -cdlmnpsy"
+ialias iftop "sudo iftop"
+ialias wifispot "sudo create_ap wlp8s0 wlp8s0"
+ialias wirespot "sudo create_ap wlp8s0 enp9s0"
+ialias ports "sudo netstat -tulnp"
+
+# edit
+ialias v "vim"
+ialias sv "env SUDO_EDITOR=vim sudoedit"
+ialias e "emacsclient -s cli -nw -c"
+ialias em "emacs --no-desktop -nw"
+ialias se "env SUDO_EDITOR=\"emacsclient -s cli -nw -c\" sudoedit"
+ialias ec "emacsclient -nc"
+
+# git
+ialias gil "git log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+ialias gci "git commit -m"
+ialias gps "git push -u origin master"
+
+# nginx
+ialias ngtest "sudo nginx -c /etc/nginx/nginx.conf -t"
+ialias ngrel "sudo nginx -c /etc/nginx/nginx.conf -t; and sudo nginx -s reload";
+
+# Others
+ialias resys "tmuxomatic ~/.tmuxomatic/sys"
+ialias now 'date +"%Y-%m-%d %H:%M:%S %A"'
+ialias cb 'xclip -ib'
+ialias fixdropbox 'echo fs.inotify.max_user_watches=1000000 | sudo tee -a /etc/sysctl.conf; sudo sysctl -p'
+ialias xo "xdg-open"
+ialias rel "source ~/.zshrc"
+ialias server "python2 -mSimpleHTTPServer"
+#---------------------------------------------------------------------
+
+
+# helpers ############################################################
+t() {
+    if has fanyi; then
+        fanyi "$1"
+    else
+        wget -qO- \
+        "http://fanyi.youdao.com/openapi.do?keyfrom=sudotry&key=1865874386&type=data&doctype=json&version=1.1&q=$1" |\
+        grep --color=auto -oP '(?<="explains":\[")[^"]*'
+    fi
+}
+
+cbi() {
+    # get content according to number of arguments
+    local content=
+    case $# in
+        0) read content ;;
+        1) [ -f "$1" ] && content=$(cat "$1") ;;
+        *) content="$*" ;;
+    esac
+
+    # copy to system clipboard
+    if has xsel; then
+        echo -n "$content" | xsel -bi
+    elif has xclip; then
+        echo -n "$content" | xclip -selection clipboard -i
+    fi
+}
+
+cbo() {
+    if has xsel; then
+        xsel -bo
+    elif has xclip; then
+        xclip -selection clipboard -o
+    fi
+}
+
+down() {
+    aria2c \
+        --file-allocation=none \
+        --header="User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36\
+        (KHTML, like Gecko) Chrome/51.0.2704.63 Safari/537.36" \
+        -x16 $@
+}
+
+ngls() {
+    local dir1=/etc/nginx/sites-available/
+    local dir2=/etc/nginx/sites-enabled/;
+    ls $dir1 $dir2; echo ""; diff -u $dir1 $dir2;
+}
+
+ngln() {
+    for i in "$@"; do
+        local conf_dir=/etc/nginx
+        local command="sudo ln -sf $conf_dir/sites-available/$i $conf_dir/sites-enabled/$i"
+        echo "$command"
+        eval "$command"
+    done
+}
+
+ngrm() {
+    for i in "$@"; do
+        local conf_dir=/etc/nginx
+        local command="sudo rm -f $conf_dir/sites-enabled/$i"
+        echo "$command"
+        eval "$command"
+    done
+}
+
+
+# quick extract and compress
+extract() {
+    if [ -f "$1" ]; then
+        case "$1" in
+            *.tar.bz2|*.tbz2)
+                tar xvpjf "$1" ;;
+            *.tar.gz|*.tgz)
+                tar xvpzf "$1" ;;
+            *.bz2)
+                bunzip2 "$1" ;;
+            *.rar)
+                rar x "$1" ;;
+            *.gz)
+                gunzip "$1" ;;
+            *.tar)
+                tar xvpf "$1" ;;
+            *.zip|*.apk|*.epub|*.xpi|*.war|*.jar)
+                unzip "$1" ;;
+            *.Z)
+                uncompress "$1" ;;
+            *.7z)
+                7z x "$1" ;;
+            *)
+                echo "don't know how to extract $1" ;;
+        esac
+    fi
+}
+
+compress() {
+    if [ $# -ge 2 ]; then
+        case "$1" in
+            *.tar)
+                tar cvpf $* ;;
+            *.tar.bz2|*.tbz2)
+                tar cvpjf $* ;;
+            *.tar.gz|*.tgz)
+                tar cvpzf $* ;;
+            *.tar)
+                tar cvpf $* ;;
+            *.bz2)
+                bzip2 -k $* ;;
+            *.zip)
+                zip -r $* ;;
+            *.rar)
+                rar a -r $* ;;
+            *.7z)
+                7z a $* ;;
+            *)
+                echo "don't know how to compress to $1" ;;
+        esac
+    fi
+}
+
+
+# docker
+ialias d "sudo docker"
+ialias dco "sudo docker-compose"
+ialias dps "d ps -a"
+ialias dim "d images"
+ialias drm "d rm"
+ialias drmi "d rmi"
+ialias drun "d run"
+ialias den docker-enter
+ialias denv docker-env
+ialias dpo docker-ports
+ialias docker-tree "drun --rm -v /var/run/docker.sock:/var/run/docker.sock nate/dockviz images -t"
+ialias docker-pid "d inspect --format '{{.State.Pid}}'"
+ialias docker-ip "d inspect --format '{{.NetworkSettings.IPAddress}}'"
+
+drum() {
+    d run --rm -it -v "$(realpath ./)":/host "$1" sh
+}
+
+docker-clean() {
+    for x in $(sudo docker ps -aq -f "status=dead" -f "status=exited"); do
+        d rm -v $x
+    done
+}
+
+docker-cleani() {
+    for x in $(sudo docker images | grep -i '<none>' | awk '{print $3}'); do
+        d rmi $x
+    done
+}
+
+docker-enter() {
+    d exec -it "$1" sh
+}
+
+docker-env() {
+    d inspect --format '{{range $x := .Config.Env}}{{println $x}}{{end}}' "$1" | sed '/^$/d'
+}
+
+docker-ports() {
+    d inspect --format '{{json .NetworkSettings.Ports}}' "$1" | python -mjson.tool
+}
+#---------------------------------------------------------------------
+
+
+setup-ssh-agent() {
+    if [ -z "$(ps -hp $SSH_AGENT_PID 2>/dev/null)" ]; then
+        eval "$(ssh-agent | sed '/echo [^;]*;/d')"
+    fi
+}
+
+maybe-startx() {
+    if [[ -o login ]] && has startx && [ -z "$DISPLAY" -a "$XDG_VTNR" -eq 1 ]; then
+        local ok=n
+        echo -n "Run startx? [y/n] "
+        read -sk ok
+        [ "$ok" = y ] && startx -- -keeptty
+    fi
+}
+
+setup-ssh-agent
+maybe-startx

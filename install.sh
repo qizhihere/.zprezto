@@ -2,9 +2,10 @@
 
 PWD=$(dirname "$0")
 cd "$PWD" && {
+    git pull origin master
     git submodule update --init --recursive
     for x in runcoms/z*; do
-        ln -s .zprezto/$x ~/.${x##*/}
+        ln -sf .zprezto/$x ~/.${x##*/}
     done
-    ln -s .zprezto/.dircolors ~/.dircolors
+    ln -sf .zprezto/.dircolors ~/.dircolors
 }

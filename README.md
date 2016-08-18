@@ -1,6 +1,5 @@
 Installation
 ------------
 
-    cd ~
-    git clone https://github.com/qizhihere/.zprezto
-    .zprezto/install.zsh
+    git clone https://github.com/qizhihere/.zprezto ~/.zprezto
+    ~/.zprezto/install.zsh

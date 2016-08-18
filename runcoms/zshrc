@@ -76,7 +76,7 @@ fi
 
 # third-party programs ###############################################
 # ls colors
-[ -f ~/.dircolors ] && eval "$(dircolors -b ~/.dircolors)"
+has dircolors && [ -f ~/.dircolors ] && eval "$(dircolors -b ~/.dircolors)"
 
 # fasd
 install_fasd() {
@@ -339,7 +339,7 @@ docker-ports() {
 
 
 setup-ssh-agent() {
-    if [ -z "$(ps -hp $SSH_AGENT_PID 2>/dev/null)" ]; then
+    if has ssh-agent && [ -z "$(ps -hp $SSH_AGENT_PID 2>/dev/null)" ]; then
         eval "$(ssh-agent | sed '/echo [^;]*;/d')"
     fi
 }

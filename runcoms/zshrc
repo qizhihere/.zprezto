@@ -151,9 +151,10 @@ ialias se "env SUDO_EDITOR=\"emacsclient -s cli -nw -c\" sudoedit"
 ialias ec "emacsclient -nc"
 
 # git
+ialias gis "git status"
 ialias gil "git log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 ialias gci "git commit -m"
-ialias gps "git push -u origin master"
+ialias gps 'git push --set-upstream origin "$(git-branch-current 2>/dev/null)"'
 
 # nginx
 ialias ngtest "sudo nginx -c /etc/nginx/nginx.conf -t"

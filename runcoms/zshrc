@@ -146,8 +146,13 @@ ialias ports "sudo netstat -tulnp"
 ialias v "vim"
 ialias sv "env SUDO_EDITOR=vim sudoedit"
 ialias e "emacsclient -s cli -nw -c"
-ialias em "emacs --no-desktop -nw"
-ialias se "env SUDO_EDITOR=\"emacsclient -s cli -nw -c\" sudoedit"
+se() {
+    local files
+    for x in "$@"; do
+        files="$files \"/sudo::$x\""
+    done
+    eval "e $files"
+}
 ialias ec "emacsclient -nc"
 
 # git

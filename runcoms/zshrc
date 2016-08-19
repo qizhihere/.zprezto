@@ -43,11 +43,14 @@ export INIT_TERM="$TERM"
 export TERM="screen-256color"
 
 # default editor
-if has emacsclient && has_proc "^emacs +.*--daemon=cli"; then
-    export EDITOR="emacsclient -s cli -nw -c"
+export EMACSCLISOCK=/tmp/emacs/cli.sock # WARNING: The sock path must contains no spaces!
+export EMACSCLIENT="emacsclient -s $EMACSCLISOCK -nw -c"
+if has emacsclient && has_proc "emacs +.*--daemon=$EMACSCLISOCK"; then
+    export EDITOR="$EMACSCLIENT"
 elif has vim; then
     export EDITOR="vim"
 fi
+export VISUAL="$EDITOR"
 
 # java environment
 export JAVA_HOME=$(eval "ls -dr1 /usr/lib/jvm/java-*-openjdk" 2>/dev/null | head -1)
@@ -144,8 +147,8 @@ ialias ports "sudo netstat -tulnp"
 
 # edit
 ialias v "vim"
-ialias sv "env SUDO_EDITOR=vim sudoedit"
-ialias e "emacsclient -s cli -nw -c"
+ialias sv "env SUDO_EDITOR=vim sudo -e"
+ialias e "$EMACSCLIENT"
 se() {
     local files
     for x in "$@"; do

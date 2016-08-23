@@ -175,7 +175,19 @@ ialias cb 'xclip -ib'
 ialias fixdropbox 'echo fs.inotify.max_user_watches=1000000 | sudo tee -a /etc/sysctl.conf; sudo sysctl -p'
 ialias xo "xdg-open"
 ialias rel "source ~/.zshrc"
-ialias server "python2 -mSimpleHTTPServer"
+
+server() {
+    local port=${1:-8000}
+    if has node; then
+        local cachejs="$HOME/.cache/pad.js"
+        [ -f "$cachejs" ] || curl -s pad.js.org > "$cachejs"
+        node "$cachejs" $port
+    elif has ruby; then
+        ruby -rwebrick -e"WEBrick::HTTPServer.new(:Port => $port, :DocumentRoot => Dir.pwd).start"
+    else
+        python2 -mSimpleHTTPServer $port
+    fi
+}
 #---------------------------------------------------------------------
 
 

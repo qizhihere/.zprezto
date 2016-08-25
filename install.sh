@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-CUR=$(realpath "$(dirname "$0")")
+CUR=$(readlink -f "$(dirname "$0")")
 DST="$HOME/.zprezto"
 
 cd "$CUR" && {

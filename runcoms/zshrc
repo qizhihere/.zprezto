@@ -152,7 +152,7 @@ ialias e "$EMACSCLIENT"
 se() {
     local files
     for x in "$@"; do
-        files="$files \"/sudo::$x\""
+        files="$files \"/sudo::$(readlink -f "$x")\""
     done
     eval "e $files"
 }

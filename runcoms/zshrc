@@ -175,6 +175,8 @@ ialias cb 'xclip -ib'
 ialias fixdropbox 'echo fs.inotify.max_user_watches=1000000 | sudo tee -a /etc/sysctl.conf; sudo sysctl -p'
 ialias xo "xdg-open"
 ialias rel "source ~/.zshrc"
+ialias speed-test "wget -qO- bench.sh | bash"
+ialias unixbench "wget -qO- https://github.com/teddysun/across/raw/master/unixbench.sh | sudo bash"
 
 server() {
     local port=${1:-8000}

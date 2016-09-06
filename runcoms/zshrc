@@ -177,6 +177,9 @@ ialias xo "xdg-open"
 ialias rel "source ~/.zshrc"
 ialias speed-test "wget -qO- bench.sh | bash"
 ialias unixbench "wget -qO- https://github.com/teddysun/across/raw/master/unixbench.sh | sudo bash"
+
+mo() { sudo mount -o uid=$(id -u),gid=$(id -g),umask=022,iocharset=utf8 $* }
+
 randpw() { tr -dc _A-Za-z0-9 < /dev/urandom | head -c${1:-12};echo }
 
 server() {

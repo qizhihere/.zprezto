@@ -149,6 +149,7 @@ ialias ports "sudo netstat -tulnp"
 ialias v "vim"
 ialias sv "env SUDO_EDITOR=vim sudo -e"
 ialias e "$EMACSCLIENT"
+ialias E "emacsclient -n"
 se() {
     local files
     for x in "$@"; do
@@ -177,6 +178,9 @@ ialias xo "xdg-open"
 ialias rel "source ~/.zshrc"
 ialias speed-test "wget -qO- bench.sh | bash"
 ialias unixbench "wget -qO- https://github.com/teddysun/across/raw/master/unixbench.sh | sudo bash"
+ialias pip "sudo -H pip"
+ialias pip3 "sudo -H pip3"
+ialias pip2 "sudo -H pip2"
 
 mo() { sudo mount -o uid=$(id -u),gid=$(id -g),umask=022,iocharset=utf8 $* }
 
@@ -185,14 +189,20 @@ randpw() { tr -dc _A-Za-z0-9 < /dev/urandom | head -c${1:-12};echo }
 server() {
     local port=${1:-8000}
     if has node; then
-        local cachejs="/tmp/pad.js"
-        [ -f "$cachejs" ] || curl -s pad.js.org > "$cachejs"
+        local cachejs="$HOME/.cache/pad.js"
+        [ -f "$cachejs" ] || curl -sSL pad.js.org > "$cachejs"
         node "$cachejs" $port
     elif has ruby; then
         ruby -rwebrick -e"WEBrick::HTTPServer.new(:Port => $port, :DocumentRoot => Dir.pwd).start"
     else
         python2 -mSimpleHTTPServer $port
     fi
+}
+
+ftp_server() {
+    local cache="$HOME/.cache/ftp_server.py"
+    [ -f "$cache" ] || curl -sSL https://github.com/qizhihere/oneliners/raw/master/ftp_server.py > "$cache"
+    sudo python "$cache" "$@"
 }
 #---------------------------------------------------------------------
 

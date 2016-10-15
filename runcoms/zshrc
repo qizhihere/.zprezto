@@ -95,6 +95,7 @@ install_fasd() {
     exec zsh
 }
 eval "$(fasd --init auto)"
+ialias j fasd
 #---------------------------------------------------------------------
 
 
@@ -137,8 +138,8 @@ ialias pls 'expac -H M -s "%-3! %-25n  -> %-10v %-10m %l <%+5r>  ::%d"'
 
 # network
 ialias xyw "sudo ~/Softs/rj/rjsupplicant.sh"
-ialias px "proxychains4"
-ialias spx "sudo proxychains4"
+ialias px "proxychains"
+ialias spx "sudo proxychains"
 ialias dstat "command dstat -cdlmnpsy"
 ialias iftop "sudo iftop"
 ialias wifispot "sudo create_ap wlp8s0 wlp8s0"
@@ -171,6 +172,7 @@ ialias ngrel "sudo nginx -c /etc/nginx/nginx.conf -t; and sudo nginx -s reload";
 
 # Others
 ialias resys "tmuxomatic ~/.tmuxomatic/sys"
+ialias rewin "tmuxomatic ~/.tmuxomatic/win"
 ialias now 'date +"%Y-%m-%d %H:%M:%S %A"'
 ialias cb 'xclip -ib'
 ialias fixdropbox 'echo fs.inotify.max_user_watches=1000000 | sudo tee -a /etc/sysctl.conf; sudo sysctl -p'
